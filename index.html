@@ -1,0 +1,1419 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>English Brain Digital — Live Tracking </title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --page:#c9cae4; --white:#ffffff; --tint:#f4f3fb; --ink:#111111; --muted:#6b6b80; --line:#e3e2f0;
+  --green:#2fd67b; --lav:#c5b8f5; --lime:#d9f7a8; --yellow:#ffe45e; --pink:#ffc4ec; --mint:#d7f5c1;
+  --danger:#ff4d4f;
+  --ok:#1b7a3d; --okbg:#dff3e5; --bad:#b3261e; --badbg:#fbe3e0;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;padding:20px;font-family:'Inter',system-ui,Arial,sans-serif;background:var(--page);color:var(--ink);min-height:100vh;font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+::selection{background:var(--green)}
+i,em{font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-weight:400}
+
+.app{background:var(--white);border-radius:36px;min-height:calc(100vh - 40px);overflow:clip;display:block}
+.side{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:8px;padding:22px clamp(20px,3.5vw,48px);background:rgba(255,255,255,.92);backdrop-filter:blur(12px)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:19px;letter-spacing:-.02em;flex:1;margin:0}
+.logo{width:26px;height:26px;background:var(--ink);clip-path:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)}
+.nav-btn{border:1px solid var(--line);background:var(--white);padding:8px 18px;border-radius:999px;font-weight:500;font-size:14px;cursor:pointer;transition:border-color .15s,background .15s}
+.nav-btn:hover{border-color:var(--ink)}
+.nav-btn.active{border-color:var(--ink)}
+.side .spacer{flex:1}
+.side .ver{font-size:12px;color:var(--muted);min-width:0}
+
+.wrap{padding:24px clamp(20px,3.5vw,48px) 64px;width:100%;min-width:0;max-width:none}
+.screen{display:none}
+.screen.active{display:block;animation:fade .3s ease}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+h1,h2,h3,h4{margin:0}
+h2{font-weight:700;font-size:clamp(32px,4.2vw,56px);letter-spacing:-.04em;line-height:1.02}
+h2 .muted,h2 i{font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-weight:400;letter-spacing:-.01em}
+h4{font-size:14px;font-weight:700}
+.muted{color:var(--muted)}
+.badge{display:inline-block;padding:5px 14px;border:1px solid var(--ink);border-radius:999px;font-weight:600;font-size:12px;background:var(--white)}
+
+.btn{border:1.5px solid var(--ink);border-radius:999px;padding:13px 26px;font-weight:600;font-size:15px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--white);color:var(--ink);transition:background .15s,transform .15s}
+.btn:hover{background:var(--tint)}
+.btn:active{transform:scale(.98)}
+.primary{background:var(--ink);color:var(--white)}
+.primary:hover{background:var(--green);color:var(--ink)}
+.secondary{background:var(--white)}
+.btn.ok{background:var(--green);color:var(--ink)}
+.btn.ok:hover{background:#25c06c}
+.btn.full{width:100%}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}
+.stack{display:flex;flex-direction:row;flex-wrap:wrap;justify-content:center;align-items:center;gap:12px;max-width:none;margin:28px auto 0}
+.stack>div{flex:0 0 auto}
+#recordToggleBtn,#taskRecordBtn{padding:18px 44px;font-size:17px}
+
+.card{background:var(--tint);border:0;border-radius:28px;padding:30px;margin-bottom:20px}
+.section-title{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:28px;flex-wrap:wrap}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+
+.hero{display:block;position:relative}
+.hero-main{position:relative;padding:8px 0 0}
+.hero h1{font-weight:700;font-size:clamp(54px,9.2vw,132px);line-height:.98;letter-spacing:-.045em;margin:22px 0 26px;max-width:12.5em}
+.hero h1 i{font-size:1.06em;letter-spacing:-.025em}
+.ast{display:inline-grid;place-items:center;width:.78em;height:.78em;border-radius:50%;background:var(--mint);vertical-align:.02em;margin-right:.14em}
+.ast svg{width:52%;height:52%}
+.lede{display:flex;align-items:center;gap:18px;max-width:520px}
+.oval{flex:0 0 auto;width:110px;height:56px;border-radius:999px;background:var(--lav);display:grid;place-items:center}
+.oval i{display:block;width:34px;height:34px;border-radius:50%;background:#ff7fd1;position:relative}
+.oval i::after{content:"";position:absolute;left:50%;top:50%;width:12px;height:12px;border-radius:50%;background:var(--white);transform:translate(-50%,-50%)}
+.hero p{font-size:14px;color:#3b3b4d;line-height:1.55;margin:0}
+.sticker{position:absolute;top:-6px;right:clamp(0px,6vw,90px);width:clamp(110px,12vw,170px);animation:spin 28s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.tags{position:absolute;right:0;bottom:-10px;width:min(360px,34%);height:170px}
+.tag{position:absolute;padding:12px 24px;border-radius:999px;font-weight:700;font-size:18px;white-space:nowrap}
+.tag.a{background:var(--pink);right:34%;top:14px;transform:rotate(16deg)}
+.tag.b{background:var(--lav);right:2%;top:46px;transform:rotate(-12deg)}
+.tag.c{background:var(--green);right:26%;top:100px;transform:rotate(-22deg)}
+.dot{position:absolute;border-radius:50%;display:grid;place-items:center}
+.dot.y{width:38px;height:38px;background:var(--yellow);right:6%;top:0}
+.dot.p{width:30px;height:30px;background:#ff9bd8;right:0;top:104px}
+.hero-row{display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:18px;align-items:end;margin-top:44px}
+.tile{position:relative;overflow:hidden;border-radius:30px;padding:22px 24px;display:flex;flex-direction:column;align-items:flex-start;gap:14px;background-repeat:no-repeat}
+.tile span{font-size:12px;font-weight:600;padding:4px 12px;border:1.5px solid var(--ink);border-radius:999px;background:rgba(255,255,255,.6);position:relative;z-index:1}
+.tile b{font-size:clamp(26px,2.6vw,36px);font-weight:700;letter-spacing:-.03em;line-height:1.05;position:relative;z-index:1}
+.tile b i{font-size:1.1em}
+.tile::after{content:"\2197";position:absolute;top:20px;right:20px;width:40px;height:40px;border:1.5px solid var(--ink);border-radius:50%;display:grid;place-items:center;font-size:18px}
+.t1{background-color:var(--green);min-height:230px;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'><g fill='%23ffe45e'><circle cx='60' cy='24' r='24'/><circle cx='95' cy='50' r='24'/><circle cx='82' cy='92' r='24'/><circle cx='38' cy='92' r='24'/><circle cx='25' cy='50' r='24'/><circle cx='60' cy='60' r='26'/></g></svg>");background-size:150px;background-position:left -18px bottom -26px}
+.t2{background-color:var(--lav);min-height:290px;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 140 140'><path d='M30 120 C 0 60, 50 10, 90 30 C 130 50, 100 110, 60 90 C 30 74, 60 40, 85 55' fill='none' stroke='%23d9f7a8' stroke-width='16' stroke-linecap='round'/></svg>");background-size:170px;background-position:right 6px bottom 10px}
+.t3{background-color:var(--lime);min-height:250px;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120' fill='none' stroke='%23c5b8f5' stroke-width='14' stroke-linecap='round'><path d='M60 10V110'/><path d='M16.7 35L103.3 85'/><path d='M16.7 85L103.3 35'/></svg>");background-size:130px;background-position:left 14px bottom -22px}
+
+.testbox{text-align:center;padding:44px 28px;border-radius:32px}
+.testbox h2{margin:16px 0 10px}
+.topic{font-weight:700;font-size:clamp(18px,2.2vw,24px);margin:16px auto;line-height:1.4;max-width:760px;padding:20px 24px;border-radius:20px;background:var(--white);letter-spacing:-.01em;text-align:left}
+.timer{font-weight:700;font-variant-numeric:tabular-nums;font-size:clamp(64px,9vw,112px);margin:6px 0;letter-spacing:-.05em;line-height:1}
+.notice{padding:12px 18px;border-radius:16px;background:#ebf9cf;margin:18px 0;font-size:14px;text-align:left}
+audio{width:100%}
+
+.w{padding:2px 6px;border-radius:6px;margin-right:4px;display:inline-block;font-weight:600}
+.w.ok{background:var(--okbg);color:var(--ok)}
+.w.bad{background:var(--badbg);color:var(--bad)}
+
+#dashboard.active{display:flex;flex-direction:column}
+#dashboard .section-title{order:0}
+#dashboard .card{order:1}
+#dashboard .actions{order:2;margin:18px 0 0}
+#dashboard .tasks{order:3}
+.stat{font-weight:700;font-size:18px;padding:8px 20px;background:var(--yellow);border-radius:999px}
+.progress{height:14px;background:var(--white);border-radius:999px;overflow:hidden;margin:14px 0 10px}
+.progress>div{height:100%;width:0%;transition:width .5s ease;background:var(--green);border-radius:999px}
+.tasks{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin-top:28px}
+.task{position:relative;display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto 1fr;grid-template-areas:"time go" "txt txt" "ico ico";gap:14px 8px;min-height:230px;padding:22px 24px;border-radius:30px;cursor:pointer;transition:transform .2s}
+.task:hover{transform:translateY(-5px) rotate(-.6deg)}
+.task:nth-child(1){background:var(--green)}
+.task:nth-child(2){background:var(--mint)}
+.task:nth-child(3){background:var(--lav)}
+.task:nth-child(4){background:var(--lime)}
+.task:nth-child(5){background:var(--yellow)}
+.task:nth-child(6){background:var(--pink)}
+.task:nth-child(7){background:#c4f0ff}
+.task small{grid-area:time;justify-self:start;align-self:start;font-size:12px;font-weight:600;padding:4px 12px;border:1.5px solid var(--ink);border-radius:999px;background:rgba(255,255,255,.55)}
+.task .go{grid-area:go;width:40px;height:40px;border:1.5px solid var(--ink);border-radius:50%;display:grid;place-items:center;font-size:18px}
+.task>div:nth-child(2){grid-area:txt}
+.task b{display:block;font-size:26px;font-weight:700;letter-spacing:-.03em;line-height:1.05}
+.task .d{font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-size:19px;margin-top:4px;color:#26262f}
+.task .ico{grid-area:ico;align-self:end;font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-size:64px;line-height:.8;opacity:.4}
+
+.field{margin:18px 0}
+.field label{display:block;font-weight:600;margin-bottom:8px;font-size:13px;color:#3b3b4d}
+.field input,.field select,.field textarea{width:100%;padding:15px 20px;border:1.5px solid transparent;border-radius:999px;background:var(--white);outline:none;font-size:16px;transition:border-color .15s}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--ink)}
+.field input[readonly]{font-weight:700}
+.field textarea{min-height:130px;resize:vertical;border-radius:24px}
+select option{background:var(--white)}
+::placeholder{color:#a3a3b8}
+.reg-form .field input{background:var(--tint)}
+
+.tf-box{background:var(--white);border-radius:20px;padding:24px;margin:16px 0;text-align:left}
+.tf-item{margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.tf-item:last-child{border-bottom:0;margin-bottom:0;padding-bottom:0}
+.tf-btns{display:flex;gap:10px;margin-top:10px}
+.tf-btn{padding:8px 20px;border:1.5px solid var(--ink);border-radius:999px;background:var(--tint);cursor:pointer;font-weight:600;font-size:14px;transition:all .15s}
+.tf-btn.selected{background:var(--ink);color:var(--white)}
+.tf-btn.correct-true{background:var(--okbg)!important;color:var(--ok)!important;border-color:var(--ok)!important}
+.tf-btn.correct-false{background:var(--badbg)!important;color:var(--bad)!important;border-color:var(--bad)!important}
+
+.lang-select-box{display:flex;gap:16px;justify-content:center;margin:30px 0}
+.lang-card-btn{background:var(--white);border:2px solid var(--ink);border-radius:24px;padding:24px 32px;font-size:20px;font-weight:700;cursor:pointer;transition:transform .15s,background .15s;display:flex;align-items:center;gap:12px}
+.lang-card-btn:hover{background:var(--mint);transform:scale(1.03)}
+
+.result-table{width:100%;border-collapse:collapse}
+.result-table th,.result-table td{padding:15px 10px;border-bottom:1px solid var(--line);text-align:left}
+.result-table th{font-size:12px;font-weight:600;color:var(--muted)}
+.up{color:#0c9a54;font-weight:700}
+
+.footer{margin-top:56px;color:var(--muted);font-size:12px;text-align:center}
+
+.reg{display:grid;grid-template-columns:minmax(300px,420px) minmax(0,1fr);gap:18px;align-items:stretch}
+.reg-side{background:var(--lav);border-radius:32px;padding:34px;display:flex;flex-direction:column;gap:20px}
+.reg-step{align-self:flex-start;font-size:12px;font-weight:600;padding:4px 12px;border:1.5px solid var(--ink);border-radius:999px;background:rgba(255,255,255,.55)}
+.reg-side h2{font-size:clamp(36px,3.6vw,52px)}
+.reg-side p{margin:0;font-size:14px;color:#2d2850}
+.code-box{background:var(--white);border-radius:22px;padding:14px 20px}
+.code-box label{display:block;font-size:11px;font-weight:600;color:var(--muted);margin-bottom:2px}
+.code-box input{width:100%;border:0;background:transparent;outline:none;font-size:32px;font-weight:700;letter-spacing:-.02em;padding:0}
+.steps{list-style:none;margin:auto 0 0;padding:0;display:flex;flex-direction:column;gap:10px}
+.steps li{display:flex;align-items:center;gap:12px;font-weight:600;font-size:15px;color:#5d5788}
+.steps li i{width:28px;height:28px;border-radius:50%;border:1.5px solid #5d5788;display:grid;place-items:center;font-style:normal;font-family:'Inter',sans-serif;font-size:12px}
+.steps li.on{color:var(--ink)}
+.steps li.on i{background:var(--ink);border-color:var(--ink);color:var(--white)}
+.reg-form{padding:34px;display:flex;flex-direction:column;border-radius:32px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1.5px solid var(--ink);background:var(--white);border-radius:999px;padding:10px 20px;font-weight:600;font-size:15px;cursor:pointer;transition:background .15s}
+.chip:hover{background:var(--mint)}
+.chip.active{background:var(--ink);color:var(--white)}
+.reg-actions{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:auto;padding-top:30px}
+
+/* AUTH WINDOW (MODAL) */
+#authModal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(17,17,25,0.7);backdrop-filter:blur(8px);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px}
+.auth-card{background:var(--white);border-radius:32px;padding:36px;width:100%;max-width:440px;box-shadow:0 20px 40px rgba(0,0,0,0.2)}
+.auth-tabs{display:flex;gap:10px;margin-bottom:24px}
+.auth-tab{flex:1;padding:12px;border:1.5px solid var(--line);border-radius:999px;background:var(--white);font-weight:700;cursor:pointer;text-align:center;transition:all .15s}
+.auth-tab.active{background:var(--ink);color:var(--white);border-color:var(--ink)}
+.auth-card .field input{background:var(--tint);border:1.5px solid var(--line)}
+
+@media(max-width:1000px){
+  .tags{display:none}
+  .hero-row{grid-template-columns:1fr 1fr}
+  .t3{grid-column:1/-1}
+}
+@media(max-width:860px){
+  body{padding:10px}
+  .app{border-radius:26px;padding-bottom:80px}
+  .side{position:fixed;top:auto;bottom:18px;left:18px;right:18px;padding:8px;border-radius:999px;background:rgba(255,255,255,.95);box-shadow:0 8px 30px rgba(40,40,90,.25);justify-content:space-around;gap:2px;z-index:30}
+  .brand,.side .spacer,.side .ver{display:none}
+  .nav-btn{padding:9px 12px;font-size:13px;border-color:transparent}
+  .nav-btn.active{background:var(--ink);color:var(--white);border-color:var(--ink)}
+  .wrap{padding:20px 16px 40px}
+  .sticker{width:96px;top:-4px;right:0}
+  .hero h1{max-width:none}
+  .hero-row{grid-template-columns:1fr}
+  .grid,.row2{grid-template-columns:1fr}
+  .reg{grid-template-columns:1fr}
+  .reg-actions{flex-direction:column-reverse;align-items:stretch}
+  .tasks{grid-template-columns:1fr 1fr}
+}
+@media(max-width:520px){.tasks{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- AUTH WINDOW -->
+<div id="authModal">
+  <div class="auth-card">
+    <span class="badge" style="margin-bottom:12px;">Secure Access</span>
+    <h2>Login / Register</h2>
+    <p class="muted" style="font-size:14px; margin-bottom:20px;">Enter your Participant Code to log in or create a new one.</p>
+    
+    <div class="auth-tabs">
+      <div class="auth-tab active" id="tabLogin" onclick="switchAuthTab('login')">Log in with code</div>
+      <div class="auth-tab" id="tabRegister" onclick="switchAuthTab('register')">New account</div>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="loginSection">
+      <div class="field"><label>Participant Code</label><input type="text" id="loginCodeInput" placeholder="EB-000"></div>
+      <button class="btn primary full" onclick="handleLogin()" style="margin-top:10px;">Log in →</button>
+    </div>
+
+    <!-- REGISTER -->
+    <div id="registerSection" style="display:none;">
+      <div class="field"><label>Generated code</label><input type="text" id="modalRegCode" readonly></div>
+      <button class="btn primary full" onclick="handleModalRegister()" style="margin-top:10px;">Create and start →</button>
+    </div>
+  </div>
+</div>
+
+<div class="app">
+
+<aside class="side">
+  <div class="brand"><i class="logo"></i>English Brain</div>
+  <button class="nav-btn active" data-nav="home" onclick="show('home')">Home</button>
+  <button class="nav-btn" data-nav="dashboard" onclick="show('dashboard')">Today</button>
+  <button class="nav-btn" data-nav="progress" onclick="show('progress')">Results</button>
+  <button class="nav-btn" data-nav="research" onclick="show('research')">Research</button>
+  <div class="spacer"></div>
+  <button class="nav-btn" onclick="logout()" style="color:var(--danger); border-color:var(--danger);">Exit</button>
+  <div class="ver" id="kzTimeDisplay">KZ Time</div>
+</aside>
+
+<main class="wrap">
+
+  <!-- HOME -->
+  <section id="home" class="screen active">
+    <div class="hero">
+      <div class="hero-main">
+        <span class="badge">A 10-day speaking experiment</span>
+        <svg class="sticker" viewBox="0 0 160 160" aria-hidden="true">
+          <defs><path id="circ" d="M80,80 m-58,0 a58,58 0 1,1 116,0 a58,58 0 1,1 -116,0"/></defs>
+          <circle cx="80" cy="80" r="79" fill="#c5b8f5"/>
+          <text font-size="14" font-weight="700" fill="#111" font-family="Inter,sans-serif"><textPath href="#circ" textLength="352" lengthAdjust="spacing">10 DAYS • SPEAK • IMPROVE • </textPath></text>
+          <path d="M80 54 C84 72 88 76 106 80 C88 84 84 88 80 106 C76 88 72 84 54 80 C72 76 76 72 80 54Z" fill="#2fd67b"/>
+        </svg>
+        <h1><span class="ast"><svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="3.2" stroke-linecap="round"><path d="M12 2.5v19"/><path d="M3.8 7.2l16.4 9.6"/><path d="M3.8 16.8l16.4-9.6"/></svg></span>Train. Track. <i>Improve.</i></h1>
+        <div class="lede">
+          <span class="oval"><i></i></span>
+          <p>Ten days, seven targeted speaking and listening exercises a day.</p>
+        </div>
+        <div class="actions">
+          <button class="btn primary" onclick="show('register')">Start training →</button>
+          <button class="btn secondary" onclick="show('about')">About the project</button>
+        </div>
+        <div class="tags" aria-hidden="true">
+          <span class="dot y"></span><span class="dot p"></span>
+          <span class="tag a">#speaking</span>
+          <span class="tag b">#practice</span>
+          <span class="tag c">#10days</span>
+        </div>
+      </div>
+      <div class="hero-row">
+        <div class="tile t1"><span>Length</span><b>Ten<br><i>days</i></b></div>
+        <div class="tile t2"><span>Every day</span><b>Seven<br><i>modules</i></b></div>
+        <div class="tile t3"><span>Engine</span><b>Browser<br><i>Whisper</i></b></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section id="about" class="screen">
+    <div class="section-title"><h2>About this project</h2><span class="badge">How it works</span></div>
+    <div class="card">
+      <p class="muted" style="margin-top:0">We want to find out whether short daily speaking practice really helps. You take a test on day one, practise for ten days, then test again and we compare.</p>
+      <div class="actions">
+        <button class="btn primary" onclick="show('register')">Create profile</button>
+        <button class="btn secondary" onclick="show('home')">← Back</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- REGISTER -->
+  <section id="register" class="screen">
+    <div class="reg">
+      <aside class="reg-side">
+        <span class="reg-step">Step 1 of 3</span>
+        <h2>Create<br>your profile</h2>
+        <p>Your data stays anonymous. You are identified only by this code.</p>
+        <div class="code-box">
+          <label for="pid">Your participant code</label>
+          <input id="pid" readonly>
+        </div>
+        <ol class="steps">
+          <li class="on"><i>1</i>Profile</li>
+          <li><i>2</i>Baseline test</li>
+          <li><i>3</i>10-day training</li>
+        </ol>
+      </aside>
+
+      <div class="reg-form card">
+        <div class="row2">
+          <div class="field"><label>Age</label><input id="age" type="number" min="10" max="19" placeholder="16"></div>
+          <div class="field"><label>Years studying English</label><input id="years" type="number" min="0" max="15" placeholder="5"></div>
+        </div>
+        <div class="field"><label>Class / group</label><input id="classroom" placeholder="11 B"></div>
+        <div class="field">
+          <label>Self-assessed level</label>
+          <select id="level" style="display:none"><option>A1</option><option>A2</option><option selected>B1</option><option>B2</option><option>Advanced</option></select>
+          <div class="chips" id="levelChips">
+            <button type="button" class="chip" onclick="pickLevel(this)">A1</button>
+            <button type="button" class="chip" onclick="pickLevel(this)">A2</button>
+            <button type="button" class="chip active" onclick="pickLevel(this)">B1</button>
+            <button type="button" class="chip" onclick="pickLevel(this)">B2</button>
+            <button type="button" class="chip" onclick="pickLevel(this)">Advanced</button>
+          </div>
+        </div>
+        <div class="reg-actions">
+          <button class="btn secondary" onclick="show('home')">← Back</button>
+          <button class="btn primary" onclick="createProfile()">Start baseline test →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRE-TEST -->
+  <section id="pretest" class="screen">
+    <div class="card testbox">
+      <span class="badge">First test</span>
+      <h2>Let's hear where you are now</h2>
+      <p class="muted">Talk for up to two minutes. Then check how it went.</p>
+      <div class="topic">“Describe a place where you feel completely comfortable and focused.”</div>
+      <div class="timer" id="timer">02:00</div>
+
+      <div class="stack">
+        <button class="btn primary" id="recordToggleBtn" onclick="togglePretestRecording()">START RECORDING</button>
+        <button class="btn secondary" id="reRecordBtn" onclick="resetPretestRecording()" style="display:none">Re-record audio</button>
+        <div id="aiSection" style="display:none">
+          <button class="btn ok full" onclick="processWhisperWithAI('pretest')">Check my speech </button>
+        </div>
+        <button class="btn primary" id="savePreBtn" onclick="finishPretest()" style="display:none">Continue →</button>
+      </div>
+
+      <audio id="pretestPlayback" controls style="margin-top:20px;display:none;width:100%"></audio>
+      <div id="recStatus" class="notice" style="display:none"></div>
+
+      <div id="aiResult" class="card" style="display:none;margin-top:22px;text-align:left">
+        <h4 style="margin-bottom:8px">Feedback</h4>
+        <p id="aiFeedbackText" class="muted" style="margin:0">Waiting for your recording...</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- DASHBOARD -->
+  <section id="dashboard" class="screen">
+    <div class="section-title">
+      <div>
+        <span class="badge" id="hello">PARTICIPANT</span>
+        <h2 style="margin-top:10px">Day <span id="dayNum">1</span> <span class="muted">/ 10</span></h2>
+      </div>
+      <div class="stat">Streak <span id="streak">0</span> days</div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;font-weight:700">
+        <span>Today's completion</span>
+        <span><span id="pct">0</span>%</span>
+      </div>
+      <div class="progress"><div id="bar"></div></div>
+      <p class="muted" style="margin:0;font-size:14px"><span id="minutes">0</span> total practice minutes (KZ Time Zone)</p>
+    </div>
+
+    <div class="tasks">
+      <div class="task" onclick="openTask('Shadowing','Listen to English audio & repeat with minimal delay + word accuracy check.','5','shadowing')">
+        <div class="ico">01</div><div><b>Shadowing</b><div class="d">Auditory shadowing </div></div><small>5-8 min</small><span class="go">→</span></div>
+      
+      <div class="task" onclick="openTask('True / False Check','Listen to a 40-sec audio clip and solve 6 True/False comprehension statements.','2','truefalse')">
+        <div class="ico">02</div><div><b>True / False</b><div class="d">Listening comprehension </div></div><small>1-2 min</small><span class="go">→</span></div>
+
+      <div class="task" onclick="openTask('English Brain Talk','Continuous monologue on a prompt with circumlocution.','3','braintalk')">
+        <div class="ico">03</div><div><b>Brain Talk</b><div class="d">Speech fluency & synonyms</div></div><small>2-3 min</small><span class="go">→</span></div>
+
+      <div class="task" onclick="openTask('Active Recall','Active lexical retrieval. Name as many category words as possible in 60 sec.','2','activerecall')">
+        <div class="ico">04</div><div><b>Recall</b><div class="d">Category retrieval </div></div><small>1-2 min</small><span class="go">→</span></div>
+
+      <div class="task" onclick="openTask('Simultaneous Interpreter','Choose language (RU/KK) & immediately translate short message into English.','4','interpreter')">
+        <div class="ico">05</div><div><b>Interpreter</b><div class="d">Simultaneous translation </div></div><small>3-5 min</small><span class="go">→</span></div>
+
+      <div class="task" onclick="openTask('Switch Mode','Instant language switching between RU/KK and EN on signal.','4','switchmode')">
+        <div class="ico">06</div><div><b>Switch Mode</b><div class="d">Fast cross-language switching</div></div><small>3-5 min</small><span class="go">→</span></div>
+
+      <div class="task" onclick="openTask('3 Ways','Express one single idea using 3 completely different syntactic structures.','3','threeways')">
+        <div class="ico">07</div><div><b>3 Ways</b><div class="d">1 idea, 3 syntactic variations</div></div><small>3 min</small><span class="go">→</span></div>
+    </div>
+
+    <div class="actions">
+      <button class="btn secondary" onclick="show('progress')">My results & History</button>
+      <button class="btn primary" onclick="show('journal')">Journal</button>
+    </div>
+  </section>
+
+  <!-- TASK SCREEN -->
+  <section id="task" class="screen">
+    <div class="card testbox">
+      <span class="badge" id="taskBadge">TASK MODULE</span>
+      <h2 id="taskTitle">Task Title</h2>
+
+      <!-- INTERPRETER LANGUAGE CHOICE -->
+      <div id="interpreterLangSelect" style="display:none; margin:20px 0;">
+        <p style="font-size:16px; font-weight:600; color:var(--muted);">Select the source language for simultaneous interpretation:</p>
+        <div class="lang-select-box">
+          <button class="lang-card-btn" onclick="startInterpreterMode('ru')">RU </button>
+          <button class="lang-card-btn" onclick="startInterpreterMode('kk')">KZ </button>
+        </div>
+      </div>
+
+      <!-- SHADOWING AUDIO SECTION -->
+      <div id="shadowingContainer" style="display:none; margin:18px 0;">
+        <p style="font-size:12px; font-weight:700; letter-spacing:0.05em; color:var(--muted); margin-bottom:8px;">TARGET REFERENCE PHRASE:</p>
+        <div class="topic" style="background:var(--white); font-size:20px;" id="shadowingReferenceText"></div>
+        <button class="btn secondary" onclick="playTargetAudio()" style="margin-top:4px;">🔊 Listen reference</button>
+      </div>
+
+      <!-- TRUE / FALSE SECTION -->
+      <div id="tfContainer" style="display:none; margin:18px 0;">
+        <p style="font-size:12px; font-weight:700; letter-spacing:0.05em; color:var(--muted); margin-bottom:8px;">LISTEN TO THE 40-SECOND AUDIO CLIP & SOLVE:</p>
+        <button class="btn secondary" onclick="playTfAudio()" style="margin-bottom:14px; width:100%;">🔊 Play Audio Clip (~40 sec)</button>
+        
+        <div class="tf-box" id="tfBoxContent"></div>
+
+        <button class="btn ok full" onclick="checkTfAnswers()" style="margin-top:10px;">Check Answers →</button>
+        <div id="tfResultNotice" class="notice" style="display:none; margin-top:14px; font-weight:700; text-align:center;"></div>
+      </div>
+
+      <!-- VOICE RECORDING CONTAINER -->
+      <div id="voiceTaskContainer">
+        <p class="topic" id="taskPrompt">Prompt instruction here...</p>
+        <div class="timer" id="taskTimer">02:00</div>
+
+        <div class="stack">
+          <button class="btn primary" id="taskRecordBtn" onclick="toggleTaskRecording()">START RECORDING</button>
+          <button class="btn secondary" id="taskReRecordBtn" onclick="resetTaskRecording()" style="display:none">Re-record</button>
+          <div id="taskAiSection" style="display:none">
+            <button class="btn ok full" onclick="processWhisperWithAI('task')">Check my speech </button>
+          </div>
+          <button class="btn primary" id="taskCompleteBtn" onclick="completeTask()" style="display:none">Save and continue →</button>
+          <button class="btn secondary" onclick="show('dashboard')">← Back to today</button>
+        </div>
+
+        <audio id="taskPlayback" controls style="margin-top:20px;display:none;width:100%"></audio>
+        <div id="taskRecStatus" class="notice" style="display:none"></div>
+
+        <div id="taskAiResult" class="card" style="display:none;margin-top:22px;text-align:left">
+          <h4 style="margin-bottom:8px">Feedback</h4>
+          <p id="taskAiFeedbackText" class="muted" style="margin:0">Waiting for your recording...</p>
+        </div>
+      </div>
+
+      <!-- COMPLETE BUTTON FOR TRUE/FALSE -->
+      <div id="tfCompleteSection" style="display:none; margin-top:20px;">
+        <button class="btn primary full" onclick="completeTask()">Save and continue →</button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- JOURNAL -->
+  <section id="journal" class="screen">
+    <div class="section-title"><h2>Journal</h2><span class="badge">Today</span></div>
+    <div class="card">
+      <div class="field"><label>What felt easy today?</label><textarea id="easy"></textarea></div>
+      <div class="field"><label>What was difficult?</label><textarea id="hard"></textarea></div>
+      <div class="field"><label>One thing to try tomorrow</label><textarea id="improve"></textarea></div>
+      <div class="field"><label>Confidence</label>
+        <select id="confidence"><option>1 — really hard</option><option>2 — hard</option><option selected>3 — okay</option><option>4 — good</option><option>5 — confident</option></select>
+      </div>
+      <button class="btn primary full" onclick="saveDay()" style="margin-top:10px">Save the day →</button>
+    </div>
+  </section>
+
+  <!-- PROGRESS -->
+  <section id="progress" class="screen">
+    <div class="section-title"><h2>My results & History</h2><span class="badge">KZ Timezone Track</span></div>
+    
+    <div class="card">
+      <h4 style="margin-bottom:12px;">📊 Current Skill Growth</h4>
+      <table class="result-table">
+        <thead><tr><th>Metric</th><th>Baseline</th><th>Current</th><th>Gain</th></tr></thead>
+        <tbody id="progressRows"></tbody>
+      </table>
+    </div>
+
+    <div class="card" style="margin-top:18px;">
+      <h4 style="margin-bottom:12px;">📅 Daily History Log (Past Days)</h4>
+      <table class="result-table">
+        <thead><tr><th>Date (KZ)</th><th>Day #</th><th>Minutes Practiced</th><th>Completed Modules</th></tr></thead>
+        <tbody id="historyRows">
+          <tr><td colspan="4" class="muted" style="text-align:center;">No history recorded yet. Complete tasks today!</td></tr>
+        </tbody>
+      </table>
+      <div class="actions" style="margin-top:20px;"><button class="btn secondary" onclick="show('dashboard')">← Back to Dashboard</button></div>
+    </div>
+  </section>
+
+  <!-- RESEARCH -->
+  <section id="research" class="screen">
+    <div class="section-title"><h2>Research overview</h2><span class="badge">Demo data</span></div>
+    <div class="grid">
+      <div class="card"><div class="muted">Participants</div><div class="stat" style="background:none;border:0;box-shadow:none;padding:0;font-size:44px">24</div><p class="muted" style="margin:4px 0 0">12 experimental · 12 control</p></div>
+      <div class="card"><div class="muted">Finished</div><div class="stat" style="background:none;border:0;box-shadow:none;padding:0;font-size:44px">21 / 24</div><p class="muted" style="margin:4px 0 0">Demo numbers</p></div>
+    </div>
+    <div class="actions"><button class="btn secondary" onclick="show('home')">← Home</button></div>
+  </section>
+
+  <div class="footer">English Brain </div>
+</main>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+
+// === OPENROUTER & AI SETTINGS ===
+const OPENROUTER_API_KEY = "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";
+const OPENROUTER_MODEL = "nvidia/nemotron-3.5-lightning:free";
+
+let currentMinutes=0; let timerInt=null; let seconds=120;
+let mediaRecorder; let audioChunks = []; let recordedBlob = null; let isRecordingActive = false;
+let currentTaskType = '';
+let asr = null;
+let currentSelectedLang = 'ru';
+
+// === AUTH WINDOW LOGIC ===
+function switchAuthTab(type) {
+  if (type === 'login') {
+    $('#tabLogin').classList.add('active');
+    $('#tabRegister').classList.remove('active');
+    $('#loginSection').style.display = 'block';
+    $('#registerSection').style.display = 'none';
+  } else {
+    $('#tabRegister').classList.add('active');
+    $('#tabLogin').classList.remove('active');
+    $('#registerSection').style.display = 'block';
+    $('#loginSection').style.display = 'none';
+    $('#modalRegCode').value = 'EB-' + String(Math.floor(1 + Math.random() * 999)).padStart(3, '0');
+  }
+}
+
+function handleLogin() {
+  const enteredCode = $('#loginCodeInput').value.trim();
+  if (!enteredCode) {
+    alert("Enter your Participant Code!");
+    return;
+  }
+  let users = JSON.parse(localStorage.getItem('allAppUsers') || '{}');
+  if (!users[enteredCode]) {
+    alert("Code not found! Create a new account in the “New account” tab.");
+    return;
+  }
+  localStorage.setItem('activeParticipant', enteredCode);
+  loadUserDataToLocalStorage(users[enteredCode]);
+  $('#authModal').style.display = 'none';
+  update();
+  show('dashboard');
+}
+
+function handleModalRegister() {
+  const newCode = $('#modalRegCode').value;
+  let users = JSON.parse(localStorage.getItem('allAppUsers') || '{}');
+  users[newCode] = {
+    pid: newCode,
+    day: 1,
+    streak: 0,
+    minutes: 0,
+    minutesToday: 0,
+    todayCompletedCount: 0,
+    kzLastDate: getKZDateString(),
+    kzHistory: [],
+    pre: null
+  };
+  localStorage.setItem('allAppUsers', JSON.stringify(users));
+  localStorage.setItem('activeParticipant', newCode);
+  loadUserDataToLocalStorage(users[newCode]);
+  $('#authModal').style.display = 'none';
+  $('#pid').value = newCode;
+  update();
+  show('register');
+}
+
+function logout() {
+  localStorage.removeItem('activeParticipant');
+  $('#loginCodeInput').value = '';
+  $('#authModal').style.display = 'flex';
+  switchAuthTab('login');
+}
+
+function loadUserDataToLocalStorage(userData) {
+  for (let key in userData) {
+    if (typeof userData[key] === 'object') {
+      localStorage.setItem(key, JSON.stringify(userData[key]));
+    } else {
+      localStorage.setItem(key, userData[key]);
+    }
+  }
+}
+
+function saveCurrentUserData() {
+  const activePid = localStorage.getItem('activeParticipant');
+  if (!activePid) return;
+  let users = JSON.parse(localStorage.getItem('allAppUsers') || '{}');
+  users[activePid] = {
+    pid: activePid,
+    age: localStorage.getItem('age') || '',
+    years: localStorage.getItem('years') || '',
+    classroom: localStorage.getItem('classroom') || '',
+    level: localStorage.getItem('level') || '',
+    day: localStorage.getItem('day') || 1,
+    streak: localStorage.getItem('streak') || 0,
+    minutes: localStorage.getItem('minutes') || 0,
+    minutesToday: localStorage.getItem('minutesToday') || 0,
+    todayCompletedCount: localStorage.getItem('todayCompletedCount') || 0,
+    kzLastDate: localStorage.getItem('kzLastDate') || '',
+    kzHistory: JSON.parse(localStorage.getItem('kzHistory') || '[]'),
+    pre: localStorage.getItem('pre') ? JSON.parse(localStorage.getItem('pre')) : null,
+    journal: localStorage.getItem('journal') ? JSON.parse(localStorage.getItem('journal')) : null
+  };
+  localStorage.setItem('allAppUsers', JSON.stringify(users));
+}
+
+// On load: if the user is not logged in, show the auth modal
+window.addEventListener('DOMContentLoaded', () => {
+  const activePid = localStorage.getItem('activeParticipant');
+  if (!activePid) {
+    $('#authModal').style.display = 'flex';
+  } else {
+    $('#authModal').style.display = 'none';
+    let users = JSON.parse(localStorage.getItem('allAppUsers') || '{}');
+    if (users[activePid]) loadUserDataToLocalStorage(users[activePid]);
+    update();
+  }
+});
+
+// 🌐 KAZAKHSTAN TIME (Almaty / Astana / Taldykorgan UTC+5)
+function getKZDateString() {
+  const d = new Date();
+  return d.toLocaleDateString('en-CA', { timeZone: 'Asia/Almaty' }); // YYYY-MM-DD
+}
+
+function checkAndRotateDailyDate() {
+  const kzToday = getKZDateString();
+  let lastDate = localStorage.getItem('kzLastDate');
+  
+  if (!lastDate) {
+    localStorage.setItem('kzLastDate', kzToday);
+    localStorage.setItem('todayCompletedCount', '0');
+  } else if (lastDate !== kzToday) {
+    let history = JSON.parse(localStorage.getItem('kzHistory') || '[]');
+    let dayNum = Number(localStorage.getItem('day') || 1);
+    let mins = Number(localStorage.getItem('minutesToday') || 0);
+    let comps = Number(localStorage.getItem('todayCompletedCount') || 0);
+
+    history.unshift({
+      date: lastDate,
+      day: dayNum,
+      minutes: mins,
+      completedCount: comps
+    });
+
+    localStorage.setItem('kzHistory', JSON.stringify(history));
+    localStorage.setItem('kzLastDate', kzToday);
+    localStorage.setItem('minutesToday', '0');
+    localStorage.setItem('todayCompletedCount', '0');
+    
+    if(dayNum < 10) {
+      localStorage.setItem('day', dayNum + 1);
+    }
+  }
+  saveCurrentUserData();
+}
+
+checkAndRotateDailyDate();
+
+function updateKZClock() {
+  const nowStr = new Date().toLocaleTimeString('ru-RU', { timeZone: 'Asia/Almaty', hour: '2-digit', minute: '2-digit' });
+  $('#kzTimeDisplay').textContent = `Time: ${nowStr}`;
+}
+setInterval(updateKZClock, 1000);
+updateKZClock();
+
+// DYNAMIC DATA BANKS
+const SHADOWING_PHRASES = [
+  "“Success is not final, failure is not fatal: it is the courage to continue that counts.”",
+  "“Consistency in daily practice is far more powerful than sporadic bursts of intensity.”",
+  "“Technology is best when it brings people together and unlocks human potential.”",
+  "“The secret of getting ahead is getting started, taking one focused step at a time.”",
+  "“Clear thinking requires courage, discipline, and a willingness to embrace challenges.”"
+];
+
+const TF_DATASETS = [
+  {
+    text: "Welcome to today's short briefing on productivity and learning. Many people believe that intense motivation is the secret to mastering a new skill, but research consistently shows that daily consistency is far more powerful. Small routines compound over time into massive long-term results. Beginners often overestimate what they can achieve in a single week, yet they severely underestimate what they can do in ten days of steady practice. Remember, perfect execution on day one is never required. What matters most is reducing mental friction and showing up consistently, because skipping practice for a week breaks momentum and slows down true fluency.",
+    questions: [
+      { q: "1. The speaker argues that motivation is more reliable than daily habits.", ans: false },
+      { q: "2. Small routines compound over time into massive long-term results.", ans: true },
+      { q: "3. Most people overestimate what they can achieve in a single week.", ans: true },
+      { q: "4. Perfect execution on day one is mandatory to build a lasting skill.", ans: false },
+      { q: "5. Consistency reduces mental friction when facing difficult tasks.", ans: true },
+      { q: "6. Stopping practice for a week has zero impact on language fluency.", ans: false }
+    ]
+  },
+  {
+    text: "Physical activity directly stimulates brain plasticity and sharpens focus. Even a brief twenty minute morning walk increases circulation to the brain, boosting problem-solving performance throughout the afternoon. However, staying up late to study often negates these benefits by impairing memory consolidation.",
+    questions: [
+      { q: "1. Physical exercise improves brain plasticity and focus.", ans: true },
+      { q: "2. A twenty-minute walk has no effect on problem-solving ability.", ans: false },
+      { q: "3. Morning walks help increase brain circulation.", ans: true },
+      { q: "4. Late night study sessions enhance memory consolidation.", ans: false },
+      { q: "5. Exercise benefits can be neutralized by poor sleep habits.", ans: true },
+      { q: "6. Walking is recommended primarily right before going to bed.", ans: false }
+    ]
+  },
+  {
+    text: "Artificial intelligence models rely on vast datasets to identify complex patterns. While machine learning can automate routine coding tasks, human creativity remains indispensable for high-level software architecture and ethical decision making.",
+    questions: [
+      { q: "1. Artificial intelligence relies on large datasets to find patterns.", ans: true },
+      { q: "2. Machine learning cannot automate basic coding routines.", ans: false },
+      { q: "3. Human creativity is essential for high-level architecture.", ans: true },
+      { q: "4. AI systems currently replace all human ethical judgment.", ans: false },
+      { q: "5. Pattern recognition is a core function of AI models.", ans: true },
+      { q: "6. Coding requires zero human oversight when using AI.", ans: false }
+    ]
+  }
+];
+
+const BRAINTALK_PROMPTS = [
+  "Describe your ideal morning routine and why it sets a productive tone for the day.",
+  "Talk about a technology or app that changed the way you study or work.",
+  "Discuss the importance of learning second languages in today's global world.",
+  "Describe a place where you feel completely relaxed, focused, and creative.",
+  "Share your opinion on whether online learning is better than traditional classrooms."
+];
+
+const RECALL_CATEGORIES = [
+  "Name as many CITIES & COUNTRIES as you can in 60 seconds!",
+  "Name as many TECH TERMS & GADGETS as you can in 60 seconds!",
+  "Name as many EMOTIONAL & PERSONALITY TRAITS as you can in 60 seconds!",
+  "Name as many JOBS & PROFESSIONS as you can in 60 seconds!",
+  "Name as many SPORTS & PHYSICAL ACTIVITIES as you can in 60 seconds!"
+];
+
+const INTERPRETER_TEXTS = {
+  ru: [
+    "«Дисциплина — это ключ к успеху. Каждый день мы делаем выбор между комфортом и результатом.»",
+    "«Современные технологии помогают нам учиться быстрее и эффективнее, чем когда-либо раньше.»",
+    "«Чтобы свободно говорить на иностранном языке, главное — не бояться совершать ошибки.»",
+    "«Утренние привычки определяют продуктивность всего оставшегося дня.»"
+  ],
+  kk: [
+    "«Тәртіп — табысқа жетудің басты кілті. Күн сайын біз нәтиже мен жайлылық арасында таңдау жасаймыз.»",
+    "«Заманауи технологиялар бізге бұрын-соңды болмаған жылдамдықпен білім алуға мүмкіндік береді.»",
+    "«Шет тілінде еркін сөйлеу үшін ең бастысы — қателесуден қорықпау.»",
+    "«Таңертеңгі әдеттер бүкіл күннің өнімділігін айқындайды.»"
+  ]
+};
+
+const SWITCH_PROMPTS = [
+  "Switch rapidly between Kazakh/Russian and English! Translate: 'Завтра будет важный день' -> 'Tomorrow will be an important day' -> Continue describing your plan in English!",
+  "Switch test: Start in Russian: 'Я изучаю английский каждый день' -> Switch instantly to EN: 'because consistency brings real results!' -> Finish the monologue in English.",
+  "Switch test: Start in Kazakh: 'Бүгін мен жаңа сөздер үйрендім' -> Switch instantly to EN: 'and I feel confident applying them in conversation!'"
+];
+
+const THREEWAYS_PROMPTS = [
+  "Idea: 'The weather is terrible, so we must stay inside.' -> Express this using 3 different grammatical structures!",
+  "Idea: 'If you work hard every day, you will achieve your goal.' -> Express this using 3 different grammatical structures!",
+  "Idea: 'I missed the bus, which made me late for the interview.' -> Express this using 3 different grammatical structures!"
+];
+
+let activeTfDataset = TF_DATASETS[0];
+
+function show(id, push=true){
+  document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
+  let target = document.getElementById(id);
+  if(target) target.classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b=>{
+    const navMap={about:'home',register:'home',pretest:'dashboard',task:'dashboard',journal:'dashboard'};
+    b.classList.toggle('active', b.dataset.nav === (navMap[id]||id));
+  });
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(push) history.pushState({screen: id}, "", "#" + id);
+  if(id==='progress') renderProgress();
+}
+
+window.addEventListener('popstate', function(event) {
+  if (event.state && event.state.screen) {
+    show(event.state.screen, false);
+  } else {
+    show('home', false);
+  }
+});
+
+function code(){return localStorage.pid || ('EB-'+String(Math.floor(1+Math.random()*999)).padStart(3,'0'))}
+$('#pid').value = code();
+
+function pickLevel(btn){
+  document.querySelectorAll('#levelChips .chip').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+  $('#level').value=btn.textContent.trim();
+}
+
+function createProfile(){
+  localStorage.pid=$('#pid').value;
+  localStorage.age=$('#age').value;
+  localStorage.years=$('#years').value;
+  localStorage.classroom=$('#classroom').value;
+  localStorage.level=$('#level').value;
+  localStorage.day=localStorage.day||1;
+  saveCurrentUserData();
+  update();
+  show('pretest');
+}
+
+function getRandomItem(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function openTask(title, prompt, min, type){
+  currentTaskType = type;
+  $('#taskTitle').textContent = title;
+  $('#taskBadge').textContent = 'DAY ' + (localStorage.day||1) + ' · ' + title.toUpperCase();
+  currentMinutes = Number(min);
+
+  const shadowCont = $('#shadowingContainer');
+  const tfCont = $('#tfContainer');
+  const voiceCont = $('#voiceTaskContainer');
+  const tfComplete = $('#tfCompleteSection');
+  const langSelect = $('#interpreterLangSelect');
+
+  shadowCont.style.display = (type === 'shadowing') ? 'block' : 'none';
+  tfCont.style.display = (type === 'truefalse') ? 'block' : 'none';
+  langSelect.style.display = (type === 'interpreter') ? 'block' : 'none';
+  
+  if (type === 'interpreter') {
+    voiceCont.style.display = 'none';
+  } else if (type === 'truefalse') {
+    voiceCont.style.display = 'none';
+  } else {
+    voiceCont.style.display = 'block';
+  }
+
+  tfComplete.style.display = 'none';
+  $('#tfResultNotice').style.display = 'none';
+
+  if (type === 'shadowing') {
+    $('#shadowingReferenceText').textContent = getRandomItem(SHADOWING_PHRASES);
+    $('#taskPrompt').textContent = "Listen to the reference phrase below, then record yourself repeating it with high accuracy.";
+  } else if (type === 'truefalse') {
+    activeTfDataset = getRandomItem(TF_DATASETS);
+    renderTfQuestions(activeTfDataset.questions);
+    $('#taskPrompt').textContent = prompt;
+  } else if (type === 'braintalk') {
+    $('#taskPrompt').textContent = getRandomItem(BRAINTALK_PROMPTS);
+  } else if (type === 'activerecall') {
+    $('#taskPrompt').textContent = getRandomItem(RECALL_CATEGORIES);
+  } else if (type === 'switchmode') {
+    $('#taskPrompt').textContent = getRandomItem(SWITCH_PROMPTS);
+  } else if (type === 'threeways') {
+    $('#taskPrompt').textContent = getRandomItem(THREEWAYS_PROMPTS);
+  } else {
+    $('#taskPrompt').textContent = prompt;
+  }
+
+  $('#taskTimer').textContent = "02:00";
+  $('#taskRecordBtn').style.display = 'inline-flex';
+  $('#taskRecordBtn').textContent = "START RECORDING";
+  $('#taskRecordBtn').style.background = "";
+  $('#taskPlayback').style.display = 'none';
+  $('#taskPlayback').src = "";
+  $('#taskCompleteBtn').style.display = 'none';
+  $('#taskReRecordBtn').style.display = 'none';
+  $('#taskAiSection').style.display = 'none';
+  $('#taskAiResult').style.display = 'none';
+  $('#taskRecStatus').style.display = 'none';
+  audioChunks = [];
+  recordedBlob = null;
+
+  show('task');
+}
+
+function startInterpreterMode(lang) {
+  currentSelectedLang = lang;
+  $('#interpreterLangSelect').style.display = 'none';
+  $('#voiceTaskContainer').style.display = 'block';
+  
+  const textToTranslate = getRandomItem(INTERPRETER_TEXTS[lang]);
+  const langLabel = (lang === 'ru') ? 'Russian 🇷🇺' : 'Kazakh 🇰🇿';
+  $('#taskPrompt').innerHTML = `<b>Source text (${langLabel}):</b><br><i style="font-size:22px;">${textToTranslate}</i><br><br><b>Instructions:</b> Recording started automatically! Instantly convey the meaning of this text in English!`;
+
+  toggleTaskRecording();
+}
+
+function renderTfQuestions(questions) {
+  let html = "";
+  questions.forEach((item, idx) => {
+    const qNum = idx + 1;
+    html += `
+      <div class="tf-item">
+        <div><b>${item.q}</b></div>
+        <div class="tf-btns" data-q="${qNum}" data-ans="${item.ans}">
+          <button class="tf-btn" onclick="selectTf(this, ${qNum}, true)">True</button>
+          <button class="tf-btn" onclick="selectTf(this, ${qNum}, false)">False</button>
+        </div>
+      </div>
+    `;
+  });
+  $('#tfBoxContent').innerHTML = html;
+}
+
+function playTargetAudio() {
+  const text = $('#shadowingReferenceText').textContent;
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'en-US';
+    u.rate = 0.85;
+    window.speechSynthesis.speak(u);
+  }
+}
+
+function playTfAudio() {
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(activeTfDataset.text);
+    u.lang = 'en-US';
+    u.rate = 0.9;
+    window.speechSynthesis.speak(u);
+  }
+}
+
+function selectTf(btn, qNum, val) {
+  const container = btn.parentElement;
+  container.querySelectorAll('.tf-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+function checkTfAnswers() {
+  let score = 0;
+  let total = activeTfDataset.questions.length;
+  
+  document.querySelectorAll('.tf-btns').forEach(group => {
+    const correctVal = (group.dataset.ans === 'true');
+    const selectedBtn = group.querySelector('.tf-btn.selected');
+    
+    group.querySelectorAll('.tf-btn').forEach(b => b.classList.remove('correct-true', 'correct-false'));
+
+    if (selectedBtn) {
+      const userVal = (selectedBtn.textContent.trim() === 'True');
+      if (userVal === correctVal) {
+        score++;
+        selectedBtn.classList.add('correct-true');
+      } else {
+        selectedBtn.classList.add('correct-false');
+      }
+    }
+  });
+
+  const notice = $('#tfResultNotice');
+  notice.style.display = 'block';
+  notice.textContent = `🎯 Result: ${score} out of ${total} correct answers!`;
+  $('#tfCompleteSection').style.display = 'block';
+}
+
+function togglePretestRecording() {
+  const btn = document.getElementById('recordToggleBtn');
+  const statusDiv = document.getElementById('recStatus');
+  const audioPlayback = document.getElementById('pretestPlayback');
+  const saveBtn = document.getElementById('savePreBtn');
+  const reRecordBtn = document.getElementById('reRecordBtn');
+  const aiSection = document.getElementById('aiSection');
+
+  if (!isRecordingActive) {
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then(stream => {
+        mediaRecorder = new MediaRecorder(stream);
+        audioChunks = [];
+        mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+
+        mediaRecorder.onstop = () => {
+          recordedBlob = new Blob(audioChunks, { type: 'audio/webm' });
+          audioPlayback.src = URL.createObjectURL(recordedBlob);
+          audioPlayback.style.display = 'block';
+          statusDiv.textContent = "Audio recorded! Ready for Whisper and AI analysis.";
+          statusDiv.style.display = 'block';
+          saveBtn.style.display = 'inline-flex';
+          reRecordBtn.style.display = 'inline-flex';
+          aiSection.style.display = 'block';
+          btn.style.display = 'none';
+        };
+
+        mediaRecorder.start();
+        isRecordingActive = true;
+        btn.textContent = "STOP RECORDING";
+        btn.style.background = "var(--danger)";
+        statusDiv.textContent = "Recording in progress...";
+        statusDiv.style.display = 'block';
+        audioPlayback.style.display = 'none';
+        saveBtn.style.display = 'none';
+        reRecordBtn.style.display = 'none';
+        aiSection.style.display = 'none';
+
+        startTimer('timer', 120, stopPretestRecording);
+      })
+      .catch(err => alert("We need your microphone to record. Allow access and try again."));
+  } else {
+    stopPretestRecording();
+  }
+}
+
+function stopPretestRecording() {
+  clearInterval(timerInt);
+  if (mediaRecorder && mediaRecorder.state !== "inactive") {
+    mediaRecorder.stop();
+    mediaRecorder.stream.getTracks().forEach(track => track.stop());
+  }
+  isRecordingActive = false;
+}
+
+function resetPretestRecording() {
+  clearInterval(timerInt);
+  $('#timer').textContent = "02:00";
+  document.getElementById('recordToggleBtn').style.display = 'inline-flex';
+  document.getElementById('recordToggleBtn').textContent = "START RECORDING";
+  document.getElementById('recordToggleBtn').style.background = "";
+  document.getElementById('pretestPlayback').style.display = 'none';
+  document.getElementById('savePreBtn').style.display = 'none';
+  document.getElementById('reRecordBtn').style.display = 'none';
+  document.getElementById('aiSection').style.display = 'none';
+  document.getElementById('aiResult').style.display = 'none';
+  document.getElementById('recStatus').style.display = 'none';
+  audioChunks = [];
+  recordedBlob = null;
+}
+
+function timerIntFunc(elementId, durationInSec, onComplete) {
+  clearInterval(timerInt);
+  seconds = durationInSec;
+  timerInt = setInterval(() => {
+    seconds--;
+    let m = String(Math.floor(seconds / 60)).padStart(2, '0');
+    let s = String(seconds % 60).padStart(2, '0');
+    document.getElementById(elementId).textContent = m + ':' + s;
+    if (seconds <= 0) {
+      clearInterval(timerInt);
+      if(onComplete) onComplete();
+    }
+  }, 1000);
+}
+
+function startTimer(elemId, sec, callback) {
+  timerIntFunc(elemId, sec, callback);
+}
+
+function toggleTaskRecording() {
+  const btn = $('#taskRecordBtn');
+  const statusDiv = $('#taskRecStatus');
+  const audioPlayback = $('#taskPlayback');
+  const completeBtn = $('#taskCompleteBtn');
+  const reRecordBtn = $('#taskReRecordBtn');
+  const aiSection = $('#taskAiSection');
+
+  if (!isRecordingActive) {
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then(stream => {
+        mediaRecorder = new MediaRecorder(stream);
+        audioChunks = [];
+        mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+
+        mediaRecorder.onstop = () => {
+          recordedBlob = new Blob(audioChunks, { type: 'audio/webm' });
+          audioPlayback.src = URL.createObjectURL(recordedBlob);
+          audioPlayback.style.display = 'block';
+          statusDiv.textContent = "Audio recorded! Ready for Whisper and AI.";
+          statusDiv.style.display = 'block';
+          completeBtn.style.display = 'inline-flex';
+          reRecordBtn.style.display = 'inline-flex';
+          aiSection.style.display = 'block';
+          btn.style.display = 'none';
+        };
+
+        mediaRecorder.start();
+        isRecordingActive = true;
+        btn.textContent = "STOP RECORDING";
+        btn.style.background = "var(--danger)";
+        statusDiv.textContent = "Recording response...";
+        statusDiv.style.display = 'block';
+        audioPlayback.style.display = 'none';
+        completeBtn.style.display = 'none';
+        reRecordBtn.style.display = 'none';
+        aiSection.style.display = 'none';
+
+        startTimer('taskTimer', 120, stopTaskRecording);
+      })
+      .catch(err => alert("We need your microphone to record. Allow access and try again."));
+  } else {
+    stopTaskRecording();
+  }
+}
+
+function stopTaskRecording() {
+  clearInterval(timerInt);
+  if (mediaRecorder && mediaRecorder.state !== "inactive") {
+    mediaRecorder.stop();
+    mediaRecorder.stream.getTracks().forEach(track => track.stop());
+  }
+  isRecordingActive = false;
+}
+
+function resetTaskRecording() {
+  clearInterval(timerInt);
+  $('#taskTimer').textContent = "02:00";
+  $('#taskRecordBtn').style.display = 'inline-flex';
+  $('#taskRecordBtn').textContent = "START RECORDING";
+  $('#taskRecordBtn').style.background = "";
+  $('#taskPlayback').style.display = 'none';
+  $('#taskCompleteBtn').style.display = 'none';
+  $('#taskReRecordBtn').style.display = 'none';
+  $('#taskAiSection').style.display = 'none';
+  $('#taskAiResult').style.display = 'none';
+  $('#taskRecStatus').style.display = 'none';
+  audioChunks = [];
+  recordedBlob = null;
+}
+
+function esc(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+async function runBrowserWhisper(blobInput, statusCallback) {
+  if (!asr) {
+    statusCallback("Loading Whisper model (one time, ~40–80 MB)...");
+    const T = await import("https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2");
+    const opts = { progress_callback: d => { if(d.status==="progress") statusCallback("Loading model: "+Math.round(d.progress||0)+"%"); } };
+    
+    try {
+      asr = await T.pipeline("automatic-speech-recognition", "Xenova/whisper-base", { ...opts, device: "webgpu" });
+    } catch(err) {
+      console.warn("WebGPU unavailable, falling back to CPU:", err);
+      statusCallback("Switching to stable CPU mode...");
+      asr = await T.pipeline("automatic-speech-recognition", "Xenova/whisper-base", opts);
+    }
+  }
+  statusCallback("Recognizing speech...");
+  const ctx = new AudioContext({ sampleRate: 16000 });
+  const buf = await ctx.decodeAudioData(await blobInput.arrayBuffer());
+  const out = await asr(buf.getChannelData(0), { language: "english", task: "transcribe" });
+  return out.text;
+}
+
+const norm = s => s.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu," ").split(/\s+/).filter(Boolean);
+
+function gradeShadowingWords(referenceText, recognizedText) {
+  const ref = referenceText.split(/\s+/).filter(Boolean);
+  const r = ref.map(w => norm(w).join(""));
+  const h = norm(recognizedText);
+  const n = r.length, m = h.length;
+  const d = Array.from({length: n+1}, () => Array(m+1).fill(0));
+  for(let i = n-1; i >= 0; i--) {
+    for(let j = m-1; j >= 0; j--) {
+      d[i][j] = r[i] === h[j] ? d[i+1][j+1] + 1 : Math.max(d[i+1][j], d[i][j+1]);
+    }
+  }
+  const ok = Array(n).fill(false); let i = 0, j = 0;
+  while(i < n && j < m) {
+    if(r[i] === h[j]) { ok[i] = true; i++; j++; }
+    else if(d[i+1][j] >= d[i][j+1]) i++;
+    else j++;
+  }
+  
+  let htmlResult = "";
+  ref.forEach((w, k) => {
+    htmlResult += `<span class="w ${ok[k] ? 'ok' : 'bad'}">${w}</span> `;
+  });
+  const correctCount = ok.filter(Boolean).length;
+  const percent = n > 0 ? Math.round(correctCount / n * 100) : 0;
+  return { html: htmlResult, percent, count: correctCount, total: n };
+}
+
+async function processWhisperWithAI(type) {
+  const isPre = (type === 'pretest');
+  const resultBox = isPre ? $('#aiResult') : $('#taskAiResult');
+  const feedbackText = isPre ? $('#aiFeedbackText') : $('#taskAiFeedbackText');
+  resultBox.style.display = 'block';
+
+  if (!recordedBlob) {
+    feedbackText.textContent = 'No audio recorded found.';
+    return;
+  }
+
+  try {
+    const transcript = await runBrowserWhisper(recordedBlob, msg => {
+      feedbackText.textContent = "⏳ " + msg;
+    });
+
+    if (!transcript || !transcript.trim()) {
+      feedbackText.textContent = "Speech not recognized. Please try again closer to the microphone.";
+      return;
+    }
+
+    feedbackText.textContent = "Text received! AI is analyzing your answer...";
+
+    let shadowingGradeHtml = "";
+    if (!isPre && currentTaskType === 'shadowing') {
+      const refText = $('#shadowingReferenceText').textContent;
+      const grading = gradeShadowingWords(refText, transcript);
+      shadowingGradeHtml = `<b>🎯 Shadowing Word Accuracy:</b> ${grading.percent}% (${grading.count}/${grading.total})<br>` +
+        `<div style="font-size:18px; margin:10px 0;">${grading.html}</div><br>`;
+    }
+
+    let promptText = "";
+    if (isPre) {
+      promptText = `You are a strict English teacher. Evaluate this baseline speech transcript: "${transcript}". Give feedback on: 1. Grammar, 2. Vocabulary, 3. Estimated CEFR Level, 4. Improvement tips.`;
+    } else {
+      switch(currentTaskType) {
+        case 'shadowing':
+          promptText = `Evaluate shadowing performance. Target: "${$('#shadowingReferenceText').textContent}". Transcript: "${transcript}". Give feedback on pronunciation accuracy, rhythm and speed.`;
+          break;
+        case 'braintalk':
+          promptText = `Analyze spontaneous speech: "${transcript}". Check: 1. Fluency & circumlocution quality (describing missing words using synonyms), 2. Vocabulary & Grammar, 3. CEFR Band.`;
+          break;
+        case 'activerecall':
+          promptText = `Analyze Active Recall (60-sec category retrieval): "${transcript}". Evaluate speed, word retrieval efficiency, and range.`;
+          break;
+        case 'interpreter':
+          promptText = `Analyze Simultaneous Interpreter response (${currentSelectedLang.toUpperCase()} -> EN). Transcript: "${transcript}". Evaluate translation agility, concept preservation, and immediate spoken fluency.`;
+          break;
+        case 'switchmode':
+          promptText = `Analyze instant language switching transcript: "${transcript}". Evaluate agility and switching speed.`;
+          break;
+        case 'threeways':
+          promptText = `Analyze '3 Ways' syntactic variation transcript: "${transcript}". Verify if 1 single idea was expressed using 3 distinct grammatical structures.`;
+          break;
+        default:
+          promptText = `Analyze speech transcript: "${transcript}". Provide feedback.`;
+      }
+    }
+
+    let aiFeedbackHtml = "";
+    if (OPENROUTER_API_KEY) {
+      try {
+        const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+            "Content-Type": "application/json",
+            "HTTP-Referer": window.location.origin,
+            "X-Title": "English Brain Digital"
+          },
+          body: JSON.stringify({
+            model: OPENROUTER_MODEL,
+            messages: [
+              { role: "system", content: "You are a helpful and concise English language teaching assistant." },
+              { role: "user", content: promptText }
+            ]
+          })
+        });
+        const data = await res.json();
+        if (data.choices && data.choices[0].message) {
+          const rawAiText = data.choices[0].message.content;
+          aiFeedbackHtml = `<br><b>🤖 AI Feedback:</b><br>` + 
+            esc(rawAiText).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/\n/g,'<br>');
+        } else if (data.error) {
+          aiFeedbackHtml = `<br><span style="color:var(--danger);">OpenRouter Error: ${data.error.message || JSON.stringify(data.error)}</span>`;
+        }
+      } catch (e) {
+        aiFeedbackHtml = `<br><span style="color:var(--muted);">(OpenRouter network error: ${e.message})</span>`;
+      }
+    }
+
+    feedbackText.innerHTML = `<b>📝 Whisper Recognized:</b><br><i style="font-size:16px; color:var(--ink);">"${esc(transcript.trim())}"</i><br><br>` +
+      shadowingGradeHtml +
+      aiFeedbackHtml;
+
+  } catch (error) {
+    feedbackText.textContent = 'Processing error: ' + error.message;
+  }
+}
+
+function finishPretest(){
+  clearInterval(timerInt);
+  localStorage.pre=JSON.stringify({Speech:76,Pauses:13,Vocabulary:17,Listening:80,Switching:4.7,Meaning:3});
+  saveCurrentUserData();
+  update();
+  show('dashboard');
+}
+
+function completeTask(){
+  checkAndRotateDailyDate();
+  
+  let currentMins = Number(localStorage.getItem('minutesToday') || 0);
+  localStorage.setItem('minutesToday', currentMins + currentMinutes);
+
+  let totalMinsAll = Number(localStorage.getItem('minutes') || 0);
+  localStorage.setItem('minutes', totalMinsAll + currentMinutes);
+
+  let completedCount = Number(localStorage.getItem('todayCompletedCount') || 0);
+  localStorage.setItem('todayCompletedCount', completedCount + 1);
+
+  let streak = Number(localStorage.getItem('streak') || 0);
+  if (completedCount === 0) {
+    localStorage.setItem('streak', streak + 1);
+  }
+
+  saveCurrentUserData();
+  update();
+  show('dashboard');
+}
+
+function saveDay(){
+  checkAndRotateDailyDate();
+  let d = Number(localStorage.day || 1);
+  if(d < 10) localStorage.day = d + 1;
+  localStorage.todayCompletedCount = 0;
+  localStorage.journal = JSON.stringify({
+    easy: $('#easy').value,
+    hard: $('#hard').value,
+    improve: $('#improve').value,
+    confidence: $('#confidence').value
+  });
+  saveCurrentUserData();
+  update();
+  show('dashboard');
+}
+
+function update(){
+  checkAndRotateDailyDate();
+  let d = Number(localStorage.day || 1);
+  let completedTasks = Number(localStorage.getItem('todayCompletedCount') || 0);
+  let pct = Math.min(100, Math.round((completedTasks / 7) * 100));
+  
+  $('#dayNum').textContent = d;
+  $('#streak').textContent = localStorage.getItem('streak') || 0;
+  $('#minutes').textContent = localStorage.getItem('minutesToday') || 0;
+  $('#pct').textContent = pct;
+  $('#bar').style.width = pct + '%';
+  $('#hello').textContent = localStorage.pid || 'PARTICIPANT';
+  $('#pid').value = localStorage.pid || code();
+  saveCurrentUserData();
+}
+
+function renderProgress(){
+  checkAndRotateDailyDate();
+  let pre = JSON.parse(localStorage.pre || '{"Speech":76,"Pauses":13,"Vocabulary":17,"Listening":80,"Switching":4.7,"Meaning":3}');
+  
+  let totalMinsAll = Number(localStorage.getItem('minutes') || 0);
+  let factor = Math.min(totalMinsAll / 150, 1);
+
+  let cur = {
+    Speech: Math.round(pre.Speech + 28 * factor),
+    Pauses: Math.max(6, Math.round(pre.Pauses - 7 * factor)),
+    Vocabulary: Math.round(pre.Vocabulary + 9 * factor),
+    Listening: Math.round(pre.Listening + 10 * factor),
+    Switching: Number((pre.Switching - 1.6 * factor).toFixed(1)),
+    Meaning: Math.min(5, Math.round(pre.Meaning + factor))
+  };
+
+  let labels = {
+    Speech: 'Speaking speed (words)',
+    Pauses: 'Long pauses',
+    Vocabulary: 'Active vocabulary',
+    Listening: 'Listening (%)',
+    Switching: 'Switching time (sec)',
+    Meaning: 'Meaning transfer (0–5)'
+  };
+
+  $('#progressRows').innerHTML = Object.keys(pre).map(k => `
+    <tr>
+      <td>${labels[k]}</td>
+      <td>${pre[k]}</td>
+      <td><b>${cur[k]}</b></td>
+      <td class="up">${k==='Pauses'||k==='Switching'?'↓':'↑'} ${Math.abs(Number((cur[k]-pre[k]).toFixed(1)))}</td>
+    </tr>
+  `).join('');
+
+  let history = JSON.parse(localStorage.getItem('kzHistory') || '[]');
+  let todayMins = Number(localStorage.getItem('minutesToday') || 0);
+  let todayCount = Number(localStorage.getItem('todayCompletedCount') || 0);
+  let todayDate = getKZDateString();
+  
+  let historyHtml = `<tr><td><b>${todayDate} (Today)</b></td><td>Day ${localStorage.day || 1}</td><td><b>${todayMins} min</b></td><td>${todayCount} / 7 modules</td></tr>`;
+  
+  if (history.length > 0) {
+    history.forEach(h => {
+      historyHtml += `<tr><td>${h.date}</td><td>Day ${h.day}</td><td>${h.minutes} min</td><td>${h.completedCount} / 7 modules</td></tr>`;
+    });
+  }
+
+  $('#historyRows').innerHTML = historyHtml;
+}
+
+update();
+</script>
+</body>
+</html>
